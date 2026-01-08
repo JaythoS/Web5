@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database Service
+  database:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.db
+    container_name: hospital-d-db
+    environment:
+      POSTGRES_DB: hospital_d_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      # Persistent data storage
+      - hospital_d_data:/var/lib/postgresql/data
+      # Mount schema for auto-initialization
+      - ../core/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - hospital-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hospital_d_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Adminer Database UI
+  adminer:
+    image: adminer:latest
+    container_name: hospital-d-adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - hospital-network
+    environment:
+      ADMINER_DEFAULT_SERVER: database
+      ADMINER_DESIGN: nette
+    depends_on:
+      - database
+    restart: unless-stopped
+
+# Named volumes for data persistence
+volumes:
+  hospital_d_data:
+    name: hospital_d_data
+    driver: local
+
+# Network for services
+networks:
+  hospital-network:
+    name: hospital-network
+    driver: bridge

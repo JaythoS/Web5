@@ -1,0 +1,80 @@
+# Docker Compose for Hospital-D Medical Supply Chain System
+version: '3.8'
+
+services:
+  # Database Service (PostgreSQL)
+  hospital-d-db:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.db
+    container_name: hospital-d-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: hospital_d_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - hospital_d_data:/var/lib/postgresql/data
+      # Init script is mounted via Dockerfile, but can be explicit here too
+    networks:
+      - hospital-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Stock Monitoring Service (Producer)
+  stock-ms:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.stockms
+    container_name: stock-ms
+    depends_on:
+      hospital-d-db:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=hospital-d-db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgrespassword
+      - DB_NAME=hospital_d_db
+      - EVENT_HUB_CONNECTION_STRING=${EVENT_HUB_CONNECTION_STRING}
+      - EVENT_HUB_NAME=inventory-low-events
+    networks:
+      - hospital-network
+
+  # Order Processing Service (Consumer)
+  order-ms:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.orderms
+    container_name: order-ms
+    depends_on:
+      hospital-d-db:
+        condition: service_healthy
+    ports:
+      - "8082:8082"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=hospital-d-db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgrespassword
+      - DB_NAME=hospital_d_db
+      - EVENT_HUB_CONNECTION_STRING=${EVENT_HUB_CONNECTION_STRING}
+      - EVENT_HUB_NAME=order-commands
+      - CONSUMER_GROUP=hospital-d-group
+    networks:
+      - hospital-network
+
+networks:
+  hospital-network:
+    driver: bridge
+
+volumes:
+  hospital_d_data:

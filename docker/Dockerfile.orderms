@@ -1,0 +1,29 @@
+FROM node:18-alpine
+
+# Create app directory
+WORKDIR /app
+
+# Install app dependencies
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --only=production
+
+# Copy core libraries and configuration
+COPY core ./core
+COPY config ./config
+COPY utils ./utils
+COPY adapters ./adapters
+
+# Copy OrderMS source code
+COPY serverless-group/orderms ./serverless-group/orderms
+
+# Expose port
+EXPOSE 8082
+
+# Define environment variables
+ENV NODE_ENV=production
+ENV PORT=8082
+
+# Run the app
+CMD [ "node", "serverless-group/orderms/index.js" ]

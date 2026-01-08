@@ -1,0 +1,7 @@
+pg
+dotenv
+winston
+express
+soap
+@azure/event-hubs
+uuid

@@ -1,0 +1,30 @@
+FROM node:18-alpine
+
+# Create app directory
+WORKDIR /app
+
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --only=production
+
+# Copy core libraries and configuration
+COPY core ./core
+COPY config ./config
+COPY utils ./utils
+COPY adapters ./adapters
+
+# Copy StockMS source code
+COPY serverless-group/stockms ./serverless-group/stockms
+
+# Expose port
+EXPOSE 8081
+
+# Define environment variables with defaults (can be overridden)
+ENV NODE_ENV=production
+ENV PORT=8081
+
+# Run the app
+CMD [ "node", "serverless-group/stockms/index.js" ]
