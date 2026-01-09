@@ -92,7 +92,7 @@ async function createAlert(currentStock, dailyConsumption, daysOfSupply) {
             alertType,
             severity,
             currentStock,
-            daysOfSupply: daysOfSupply.toFixed(2)
+            daysOfSupply: Number(daysOfSupply).toFixed(2)
         });
 
         return {

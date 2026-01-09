@@ -43,7 +43,7 @@ function buildStockUpdateRequest(stockData) {
     }
 
     // Round to 2 decimal places
-    daysOfSupply = parseFloat(daysOfSupply.toFixed(2));
+    daysOfSupply = parseFloat(Number(daysOfSupply).toFixed(2));
 
     // Build SOAP request according to Team 1's WSDL schema
     const request = {

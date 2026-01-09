@@ -5,7 +5,7 @@ services:
   # Database Service (PostgreSQL)
   hospital-d-db:
     build:
-      context: .
+      context: ../
       dockerfile: docker/Dockerfile.db
     container_name: hospital-d-db
     environment:
