@@ -149,7 +149,12 @@ Total Orders:      4
 │   ├── Dockerfile.orderms
 │   └── docker-compose.yml
 ├── utils/                  # Logging utilities
-└── tests/                  # Unit & integration tests
+├── tests/                  # Testing Suite (F1-F4)
+│   ├── F.1-unit/           # Core logic unit tests
+│   ├── F.2-integration/    # Real Azure integration tests
+│   ├── F.3-scenarios/      # Chaos & resilience tests
+│   ├── F.4-load/           # Load & stress testing
+│   └── manual/             # Manual verification scripts
 ```
 
 ---
