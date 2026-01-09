@@ -16,6 +16,7 @@ COPY utils ./utils
 COPY adapters ./adapters
 
 # Copy OrderMS source code
+COPY serverless-group/common ./serverless-group/common
 COPY serverless-group/orderms ./serverless-group/orderms
 
 # Expose port

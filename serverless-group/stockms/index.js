@@ -1,6 +1,23 @@
+global.crypto = require('crypto');
 const { checkAndPublishStockEvent } = require('./stock-service');
 const inventoryEventPublisher = require('./event-publisher');
 const logger = require('../../utils/logger');
+const express = require('express');
+
+// --- HTTP Health Check Server ---
+const app = express();
+const PORT = process.env.PORT || 8081;
+let server;
+
+function startHealthServer() {
+    server = app.listen(PORT, () => {
+        logger.info(`🏥 Health check server listening on port ${PORT}`);
+    });
+}
+
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'UP', service: 'StockMS' });
+});
 
 // Graceful shutdown flag
 let isShuttingDown = false;
@@ -94,20 +111,3 @@ if (require.main === module) {
 }
 
 module.exports = { runStockMonitoring };
-
-// --- HTTP Health Check Server (Added for Containerization) ---
-const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 8081;
-let server;
-
-app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'UP', service: 'StockMS' });
-});
-
-function startHealthServer() {
-    server = app.listen(PORT, () => {
-        logger.info(`🏥 Health check server listening on port ${PORT}`);
-    });
-}
-// -------------------------------------------------------------

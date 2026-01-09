@@ -8,15 +8,12 @@ services:
       context: ../
       dockerfile: docker/Dockerfile.db
     container_name: hospital-d-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
-      POSTGRES_DB: hospital_d_db
+    env_file:
+      - ../.env
     ports:
       - "5432:5432"
     volumes:
       - hospital_d_data:/var/lib/postgresql/data
-      # Init script is mounted via Dockerfile, but can be explicit here too
     networks:
       - hospital-network
     healthcheck:
@@ -34,16 +31,14 @@ services:
     depends_on:
       hospital-d-db:
         condition: service_healthy
+    env_file:
+      - ../.env
     ports:
       - "8081:8081"
     environment:
       - NODE_ENV=production
       - DB_HOST=hospital-d-db
       - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=postgrespassword
-      - DB_NAME=hospital_d_db
-      - EVENT_HUB_CONNECTION_STRING=${EVENT_HUB_CONNECTION_STRING}
       - EVENT_HUB_NAME=inventory-low-events
     networks:
       - hospital-network
@@ -57,18 +52,16 @@ services:
     depends_on:
       hospital-d-db:
         condition: service_healthy
+    env_file:
+      - ../.env
     ports:
       - "8082:8082"
     environment:
       - NODE_ENV=production
       - DB_HOST=hospital-d-db
       - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=postgrespassword
-      - DB_NAME=hospital_d_db
-      - EVENT_HUB_CONNECTION_STRING=${EVENT_HUB_CONNECTION_STRING}
       - EVENT_HUB_NAME=order-commands
-      - CONSUMER_GROUP=hospital-d-group
+      - CONSUMER_GROUP=$$Default
     networks:
       - hospital-network
 

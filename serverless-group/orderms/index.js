@@ -1,6 +1,23 @@
+global.crypto = require('crypto');
 const OrderEventConsumer = require('./event-consumer');
 const { processOrderCommand } = require('./order-service');
 const logger = require('../../utils/logger');
+const express = require('express');
+
+// --- HTTP Health Check Server ---
+const app = express();
+const PORT = process.env.PORT || 8082;
+let server;
+
+function startHealthServer() {
+    server = app.listen(PORT, () => {
+        logger.info(`🏥 Health check server listening on port ${PORT}`);
+    });
+}
+
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'UP', service: 'OrderMS' });
+});
 
 // Global consumer instance
 let consumer = null;
@@ -102,20 +119,3 @@ if (require.main === module) {
 }
 
 module.exports = { runOrderConsumer };
-
-// --- HTTP Health Check Server (Added for Containerization) ---
-const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 8082;
-let server;
-
-app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'UP', service: 'OrderMS' });
-});
-
-function startHealthServer() {
-    server = app.listen(PORT, () => {
-        logger.info(`🏥 Health check server listening on port ${PORT}`);
-    });
-}
-// -------------------------------------------------------------

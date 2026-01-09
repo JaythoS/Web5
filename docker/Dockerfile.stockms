@@ -17,6 +17,7 @@ COPY utils ./utils
 COPY adapters ./adapters
 
 # Copy StockMS source code
+COPY serverless-group/common ./serverless-group/common
 COPY serverless-group/stockms ./serverless-group/stockms
 
 # Expose port
