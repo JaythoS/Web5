@@ -38,32 +38,44 @@ describe('Error Handler - SOAP Errors', () => {
 
     test('should handle SOAP fault with faultcode', () => {
         const fault = {
-            Fault: {
-                faultcode: 'soap:Client',
-                faultstring: 'Invalid request',
-                detail: 'Missing required field'
+            root: {
+                Envelope: {
+                    Body: {
+                        Fault: {
+                            faultcode: 'soap:Client',
+                            faultstring: 'Invalid request',
+                            detail: 'Missing required field'
+                        }
+                    }
+                }
             }
         };
 
         const result = handleSOAPFault(fault);
 
-        expect(result.type).toBe('SOAP_FAULT');
-        expect(result.faultCode).toBe('soap:Client');
+        expect(result.type).toBe('CLIENT_FAULT');
+        expect(result.code).toBe('soap:Client');
         expect(result.message).toContain('Invalid request');
         expect(result.isRetryable).toBe(false); // Client faults are not retryable
     });
 
     test('should handle server SOAP fault as retryable', () => {
         const fault = {
-            Fault: {
-                faultcode: 'soap:Server',
-                faultstring: 'Internal server error'
+            root: {
+                Envelope: {
+                    Body: {
+                        Fault: {
+                            faultcode: 'soap:Server',
+                            faultstring: 'Internal server error'
+                        }
+                    }
+                }
             }
         };
 
         const result = handleSOAPFault(fault);
 
-        expect(result.type).toBe('SOAP_FAULT');
+        expect(result.type).toBe('SERVER_FAULT');
         expect(result.isRetryable).toBe(true); // Server faults are retryable
     });
 
@@ -91,8 +103,14 @@ describe('Error Handler - SOAP Errors', () => {
 describe('Error Handler - Error Categories', () => {
     test('should categorize client errors as non-retryable', () => {
         const fault = {
-            Fault: {
-                faultcode: 'soap:Client'
+            root: {
+                Envelope: {
+                    Body: {
+                        Fault: {
+                            faultcode: 'soap:Client'
+                        }
+                    }
+                }
             }
         };
 
@@ -102,8 +120,14 @@ describe('Error Handler - Error Categories', () => {
 
     test('should categorize server errors as retryable', () => {
         const fault = {
-            Fault: {
-                faultcode: 'soap:Server'
+            root: {
+                Envelope: {
+                    Body: {
+                        Fault: {
+                            faultcode: 'soap:Server'
+                        }
+                    }
+                }
             }
         };
 

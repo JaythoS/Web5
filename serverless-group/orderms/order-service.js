@@ -114,7 +114,7 @@ function validateOrderCommand(commandData) {
     ];
 
     for (const field of requiredFields) {
-        if (!commandData[field]) {
+        if (commandData[field] === undefined || commandData[field] === null) {
             throw new Error(`Missing required field: ${field}`);
         }
     }
